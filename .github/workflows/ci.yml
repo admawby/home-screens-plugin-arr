@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Package
+        run: npm run package
+        env:
+          EXPECT_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugin
+          path: plugin.tar.gz
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: plugin
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(sha256sum plugin.tar.gz | cut -d' ' -f1)
+          gh release create "$GITHUB_REF_NAME" plugin.tar.gz \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME" \
+            --notes "SHA-256 of plugin.tar.gz: \`$sha\`"

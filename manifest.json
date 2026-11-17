@@ -1,0 +1,290 @@
+{
+  "id": "arr-stack",
+  "name": "Arr Stack",
+  "version": "1.0.0",
+  "description": "Your *arr media stack on the wall: upcoming Sonarr / Radarr / Lidarr releases with posters and downloaded-or-missing state, recently added, the download queue (with SABnzbd) and Seerr requests.",
+  "author": "admawby",
+  "license": "MIT",
+  "minAppVersion": "1.7.1",
+  "moduleType": "arr-stack",
+  "category": "Media & Display",
+  "icon": "Tv",
+
+  "defaultConfig": {
+    "view": "upcoming",
+    "title": "",
+    "showHeader": true,
+    "sources": ["sonarr", "radarr", "lidarr", "sabnzbd"],
+    "layout": "auto",
+    "daysAhead": 7,
+    "daysBack": 0,
+    "recentDays": 14,
+    "maxItems": 20,
+    "showPosters": true,
+    "hideDownloaded": false,
+    "includeUnmonitored": false,
+    "showQueueState": true,
+    "groupEpisodes": true,
+    "radarrReleaseTypes": ["digital", "physical"],
+    "requestFilter": "all",
+    "refreshSeconds": 300,
+    "queueRefreshSeconds": 15,
+    "demo": false
+  },
+
+  "defaultSize": { "w": 520, "h": 640 },
+
+  "defaultStyle": {
+    "fontSize": 16,
+    "backgroundColor": "rgba(0, 0, 0, 0.35)"
+  },
+
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "view": {
+        "type": "string",
+        "title": "Show",
+        "enum": ["upcoming", "recent", "queue", "requests"],
+        "enumLabels": ["Upcoming releases", "Recently added", "Download queue", "Seerr requests"],
+        "default": "upcoming",
+        "ui:widget": "select",
+        "ui:group": "Content"
+      },
+      "sources": {
+        "type": "array",
+        "title": "Apps",
+        "description": "Which apps to read. SABnzbd is only used by the download queue; Seerr has its own view. Apps without a URL in Plugin settings are skipped.",
+        "items": { "type": "string" },
+        "enum": ["sonarr", "radarr", "lidarr", "sabnzbd"],
+        "enumLabels": ["Sonarr", "Radarr", "Lidarr", "SABnzbd"],
+        "default": ["sonarr", "radarr", "lidarr", "sabnzbd"],
+        "ui:widget": "multiselect",
+        "ui:group": "Content"
+      },
+      "daysAhead": {
+        "type": "number",
+        "title": "Days ahead",
+        "minimum": 1,
+        "maximum": 60,
+        "default": 7,
+        "ui:widget": "slider",
+        "ui:step": 1,
+        "ui:group": "Content",
+        "ui:showWhen": { "field": "view", "equals": "upcoming" }
+      },
+      "daysBack": {
+        "type": "number",
+        "title": "Days back",
+        "description": "Also show the last few days, so a missed episode stays visible.",
+        "minimum": 0,
+        "maximum": 14,
+        "default": 0,
+        "ui:widget": "slider",
+        "ui:step": 1,
+        "ui:group": "Content",
+        "ui:showWhen": { "field": "view", "equals": "upcoming" }
+      },
+      "radarrReleaseTypes": {
+        "type": "array",
+        "title": "Movie release dates",
+        "items": { "type": "string" },
+        "enum": ["cinemas", "digital", "physical"],
+        "enumLabels": ["In cinemas", "Digital", "Physical"],
+        "default": ["digital", "physical"],
+        "ui:widget": "multiselect",
+        "ui:group": "Content",
+        "ui:showWhen": { "field": "view", "equals": "upcoming" }
+      },
+      "hideDownloaded": {
+        "type": "boolean",
+        "title": "Hide what's already downloaded",
+        "default": false,
+        "ui:widget": "toggle",
+        "ui:group": "Content",
+        "ui:showWhen": { "field": "view", "equals": "upcoming" }
+      },
+      "includeUnmonitored": {
+        "type": "boolean",
+        "title": "Include unmonitored",
+        "default": false,
+        "ui:widget": "toggle",
+        "ui:group": "Content",
+        "ui:showWhen": { "field": "view", "equals": "upcoming" }
+      },
+      "showQueueState": {
+        "type": "boolean",
+        "title": "Mark items that are downloading",
+        "description": "Checks each app's queue too (one extra request per app).",
+        "default": true,
+        "ui:widget": "toggle",
+        "ui:group": "Content",
+        "ui:showWhen": { "field": "view", "equals": "upcoming" }
+      },
+      "recentDays": {
+        "type": "number",
+        "title": "Look back (days)",
+        "minimum": 1,
+        "maximum": 90,
+        "default": 14,
+        "ui:widget": "slider",
+        "ui:step": 1,
+        "ui:group": "Content",
+        "ui:showWhen": { "field": "view", "equals": "recent" }
+      },
+      "requestFilter": {
+        "type": "string",
+        "title": "Requests to show",
+        "enum": ["all", "pending", "approved", "processing", "available", "unavailable", "failed"],
+        "enumLabels": ["All", "Needs approval", "Approved", "Processing", "Available", "Not available yet", "Failed"],
+        "default": "all",
+        "ui:widget": "select",
+        "ui:group": "Content",
+        "ui:showWhen": { "field": "view", "equals": "requests" }
+      },
+      "groupEpisodes": {
+        "type": "boolean",
+        "title": "Group episodes of a show on the same day",
+        "default": true,
+        "ui:widget": "toggle",
+        "ui:group": "Content"
+      },
+      "maxItems": {
+        "type": "number",
+        "title": "Maximum items",
+        "minimum": 1,
+        "maximum": 100,
+        "default": 20,
+        "ui:widget": "slider",
+        "ui:step": 1,
+        "ui:group": "Content"
+      },
+      "title": {
+        "type": "string",
+        "title": "Title",
+        "description": "Leave empty for the view's name.",
+        "ui:widget": "text",
+        "ui:placeholder": "Upcoming",
+        "ui:group": "Appearance"
+      },
+      "showHeader": {
+        "type": "boolean",
+        "title": "Show header",
+        "default": true,
+        "ui:widget": "toggle",
+        "ui:group": "Appearance"
+      },
+      "layout": {
+        "type": "string",
+        "title": "Layout",
+        "description": "Auto uses poster cards when the module is wide and a list when it's tall.",
+        "enum": ["auto", "list", "posters"],
+        "enumLabels": ["Auto", "List", "Poster cards"],
+        "default": "auto",
+        "ui:widget": "select",
+        "ui:group": "Appearance"
+      },
+      "showPosters": {
+        "type": "boolean",
+        "title": "Posters in list layout",
+        "default": true,
+        "ui:widget": "toggle",
+        "ui:group": "Appearance"
+      },
+      "refreshSeconds": {
+        "type": "number",
+        "title": "Refresh every (seconds)",
+        "minimum": 30,
+        "maximum": 3600,
+        "default": 300,
+        "ui:widget": "slider",
+        "ui:step": 30,
+        "ui:group": "Timing"
+      },
+      "queueRefreshSeconds": {
+        "type": "number",
+        "title": "Queue refresh (seconds)",
+        "minimum": 3,
+        "maximum": 300,
+        "default": 15,
+        "ui:widget": "slider",
+        "ui:step": 1,
+        "ui:group": "Timing",
+        "ui:showWhen": { "field": "view", "equals": "queue" }
+      },
+      "demo": {
+        "type": "boolean",
+        "title": "Demo data",
+        "description": "Show sample items instead of your apps, to try layouts.",
+        "default": false,
+        "ui:widget": "toggle",
+        "ui:group": "Timing"
+      }
+    }
+  },
+
+  "settingsSchema": {
+    "type": "object",
+    "properties": {
+      "sonarrUrl": {
+        "type": "string",
+        "title": "Sonarr URL",
+        "description": "Include any URL base, e.g. http://192.168.1.10:8989 or https://media.example.com/sonarr",
+        "ui:widget": "text",
+        "ui:placeholder": "http://192.168.1.10:8989"
+      },
+      "radarrUrl": {
+        "type": "string",
+        "title": "Radarr URL",
+        "ui:widget": "text",
+        "ui:placeholder": "http://192.168.1.10:7878"
+      },
+      "lidarrUrl": {
+        "type": "string",
+        "title": "Lidarr URL",
+        "ui:widget": "text",
+        "ui:placeholder": "http://192.168.1.10:8686"
+      },
+      "sabnzbdUrl": {
+        "type": "string",
+        "title": "SABnzbd URL",
+        "ui:widget": "text",
+        "ui:placeholder": "http://192.168.1.10:8080"
+      },
+      "seerrUrl": {
+        "type": "string",
+        "title": "Seerr / Overseerr / Jellyseerr URL",
+        "ui:widget": "text",
+        "ui:placeholder": "http://192.168.1.10:5055"
+      },
+      "posterSource": {
+        "type": "string",
+        "title": "Posters from",
+        "description": "Local reads the small copies your apps already keep. Remote uses TheTVDB / TMDB, which needs internet on the hub.",
+        "enum": ["local", "remote"],
+        "enumLabels": ["Your apps (local)", "TheTVDB / TMDB (remote)"],
+        "default": "local",
+        "ui:widget": "select"
+      }
+    }
+  },
+
+  "secrets": [
+    { "key": "sonarr_api_key", "label": "Sonarr API key", "description": "Sonarr → Settings → General → API Key.", "required": false },
+    { "key": "radarr_api_key", "label": "Radarr API key", "description": "Radarr → Settings → General → API Key.", "required": false },
+    { "key": "lidarr_api_key", "label": "Lidarr API key", "description": "Lidarr → Settings → General → API Key.", "required": false },
+    { "key": "sabnzbd_api_key", "label": "SABnzbd API key", "description": "SABnzbd → Config → General → API Key (not the NZB key).", "required": false },
+    { "key": "seerr_api_key", "label": "Seerr API key", "description": "Seerr → Settings → General → API Key.", "required": false }
+  ],
+
+  "exports": {
+    "component": "default"
+  },
+
+  "allowedDomains": ["*"],
+
+  "permissions": ["network", "secrets", "localNetwork"],
+
+  "dataRequirements": [],
+  "prefetchUrl": null
+}
